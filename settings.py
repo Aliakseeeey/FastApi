@@ -29,3 +29,6 @@ ACCESS_TOKEN_EXPIRE_MINUTES: int = env.int("ACCESS_TOKEN_EXPIRE_MINUTES", defaul
 # postgres:password - This is the username and password to access the database
 # localhost:5432 - This is the address and port of the database server
 # postgres - This is the name of the database you are connecting to
+
+)
+
