@@ -1,6 +1,6 @@
 import json
 
-
+# Коммент
 async def test_create_user(client, get_user_from_database):
     user_data = {
         "name": "Test",
