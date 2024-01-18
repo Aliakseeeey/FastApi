@@ -1,6 +1,8 @@
 import json
+import pytest
+from uuid import uuid4
 
-# Коммент новый
+
 async def test_create_user(client, get_user_from_database):
     user_data = {
         "name": "Test",
