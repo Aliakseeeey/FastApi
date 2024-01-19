@@ -42,3 +42,11 @@ class UserCreate(BaseModel):
                 status_code=422, detail="Surname should contains only letters"
             )
         return value
+
+
+class DeleteUserResponse(BaseModel):
+    deleted_user_id: uuid.UUID
+
+
+class UpdatedUserResponse(BaseModel):
+    updated_user_id: uuid.UUID
