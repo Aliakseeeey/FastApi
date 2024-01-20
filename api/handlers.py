@@ -1,12 +1,19 @@
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError
 
-from api.models import UserCreate, ShowUser, DeleteUserResponse, UpdatedUserResponse
+from api.models import UserCreate, ShowUser, DeleteUserResponse, UpdatedUserResponse, UpdatedUserRequest
 from db.dals import UserDAL
 from db.session import get_db
 
 from typing import Union
 from uuid import UUID
+
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 user_router = APIRouter()
 
@@ -39,12 +46,13 @@ async def _delete_user(user_id, db) -> Union[UUID, None]:
             return delete_user_id
 
 
-async def _update_user(body, db) -> Union[UUID, None]:
+async def _update_user(update_user_param: dict, user_id: UUID, db) -> Union[UUID, None]:
     async with db as session:
         async with session.begin():
             user_dal = UserDAL(session)
             updated_user_id = await user_dal.update_user(
-                **body.dict()
+                user_id=user_id,
+                **update_user_param
             )
             return updated_user_id
 
@@ -62,13 +70,17 @@ async def _get_user_by_id(user_id, db) -> Union[ShowUser, None]:
                     name=user.name,
                     surname=user.surname,
                     email=user.email,
-                    is_active=user.is_activ,
+                    is_activ=user.is_activ,
                 )
 
 
 @user_router.post("/", response_model=ShowUser)
 async def create_user(body: UserCreate, db: AsyncSession = Depends(get_db)) -> ShowUser:
-    return await _create_new_user(body, db)
+    try:
+        return await _create_new_user(body, db)
+    except IntegrityError as err:
+        logger.error(err)
+        raise HTTPException(status_code=503, detail=f"Database error: {err}")
 
 
 @user_router.delete("/", response_model=DeleteUserResponse)
@@ -90,10 +102,15 @@ async def get_user_by_id(user_id: UUID, db: AsyncSession = Depends(get_db)) -> S
 @user_router.patch("/", response_model=UpdatedUserResponse)
 async def update_user_by_id(
         user_id: UUID, body: UpdatedUserRequest, db: AsyncSession = Depends(get_db)) -> UpdatedUserResponse:
-    if body.dict(exclude_none=True) == {}:
+    update_user_param = body.dict(exclude_none=True)
+    if update_user_param == {}:
         raise HTTPException(status_code=422, detail="At least one parameter for user update info should be provided")
     user = await _get_user_by_id(user_id, db)
     if user is None:
         raise HTTPException(status_code=422, detail=f"User with {user_id} not found.")
-    updated_user_id = await _update_user(body=body, db=db)
+    try:
+        updated_user_id = await _update_user(update_user_param=update_user_param, db=db, user_id=user_id)
+    except IntegrityError as err:
+        logger.error(err)
+        raise HTTPException(status_code=503, detail=f"Database error: {err}")
     return UpdatedUserResponse(updated_user_id=updated_user_id)
