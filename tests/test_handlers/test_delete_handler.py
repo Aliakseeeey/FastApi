@@ -1,5 +1,8 @@
 from uuid import uuid4
 
+from tests.conftest import create_user_auth_headers_for_user
+
+
 async def test_dalete_user(client, create_user_in_database, get_user_from_database):
     user_data = {
         "user_id": uuid4(),
@@ -7,9 +10,13 @@ async def test_dalete_user(client, create_user_in_database, get_user_from_databa
         "surname": "Testovich",
         "email": "Test@test.com",
         "is_active": True,
+        "hashed_password": "SampleHashedPass",
     }
     await create_user_in_database(**user_data)
-    resp = client.delete(f"/user/?user_id={user_data['user_id']}")
+    resp = client.delete(
+        f"/user/?user_id={user_data['user_id']}",
+        headers=create_user_auth_headers_for_user(user_data["email"]),
+    )
     assert resp.status_code == 200
     assert resp.json() == {"deleted_user_id": str(user_data["user_id"])}
     users_from_db = await get_user_from_database(user_data["user_id"])
