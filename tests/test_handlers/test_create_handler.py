@@ -5,7 +5,8 @@ async def test_create_user(client, get_user_from_database):
     user_data = {
         "name": "Test",
         "surname": "Testovich",
-        "email": "Test@test.com"
+        "email": "Test@test.com",
+        "password": "SamplePass1!"
     }
     resp = client.post("/user/", data=json.dumps(user_data))
     data_from_resp = resp.json()
@@ -27,12 +28,14 @@ async def test_create_user_duplicate_error(client, get_user_from_database):
     user_data = {
         "name": "Test",
         "surname": "Testovich",
-        "email": "Test@test.com"
+        "email": "Test@test.com",
+        "password": "SamplePass1!"
     }
     user_data_same_email = {
         "name": "Test_two",
         "surname": "Testovich_two",
-        "email": "Test@test.com"
+        "email": "Test@test.com",
+        "password": "SamplePass1!"
     }
     resp = client.post("/user/", data=json.dumps(user_data))
     data_from_resp = resp.json()
@@ -74,6 +77,11 @@ async def test_create_user_duplicate_error(client, get_user_from_database):
                     },
                     {
                         "loc": ["body", "email"],
+                        "msg": "field required",
+                        "type": "value_error.missing",
+                    },
+                    {
+                        "loc": ["body", "password"],
                         "msg": "field required",
                         "type": "value_error.missing",
                     },
