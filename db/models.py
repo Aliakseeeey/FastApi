@@ -2,7 +2,7 @@ import uuid
 
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import Column, Boolean, String
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, ARRAY
 
 Base = declarative_base()
 
@@ -16,4 +16,4 @@ class User(Base):
     email = Column(String, nullable=False, unique=True)
     is_activ = Column(Boolean, default=True)
     hashed_password = Column(String, nullable=False)
-
+    roles = Column(ARRAY(String), nullable=False)
