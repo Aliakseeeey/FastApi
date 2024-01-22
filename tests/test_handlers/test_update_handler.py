@@ -261,7 +261,6 @@ async def test_update_user_duplicate_email_error(client, create_user_in_database
         "hashed_password": "SampleHashedPass",
         "roles": ["ROLE_PORTAL_USER"],
     }
-    ###########################
     user_data_2 = {
         "user_id": uuid4(),
         "name": "Ivan",
