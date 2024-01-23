@@ -2,8 +2,8 @@ from typing import Union
 from uuid import UUID
 
 from api.models import ShowUser, UserCreate
-from db.dals import UserDAL, PortalRole
-from db.models import User
+from db.dals import UserDAL
+from db.models import User, PortalRole
 from hashing import Hasher
 
 
